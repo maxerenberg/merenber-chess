@@ -20,10 +20,10 @@ $playerFlag = 0;  // 0 = new player, 1 = old player, 2 = reject (too many player
 $playerNum = 'null';  // these need to be strings because we're using them as JavaScript variables later
 $playerName = 'null';
 foreach ($results as $row) {
-	if ($playerID == $row['PLAYERID']) {
+	if ($playerID == $row['playerid']) {
 		$playerFlag = 1;
-		$playerNum = $row['PLAYERNUM'];
-		$playerName = $row['PLAYERNAME'];
+		$playerNum = $row['playernum'];
+		$playerName = $row['playername'];
 		break;
 	}
 }

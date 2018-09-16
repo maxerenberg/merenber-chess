@@ -10,8 +10,8 @@ if (count($results) != 2) die('2 players not present in game');
 $playerID = isset($_COOKIE['playerID']) ? intval($_COOKIE['playerID']) : null;
 $playerNum = null;
 foreach ($results as $row) {
-	if ($row['PLAYERID'] == $playerID) {
-		$playerNum = $row['PLAYERNUM'];
+	if ($row['playerid'] == $playerID) {
+		$playerNum = $row['playernum'];
 		break;
 	}
 }
