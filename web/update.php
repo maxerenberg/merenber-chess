@@ -1,7 +1,8 @@
 <?php
 set_error_handler(function($errno, $errstr) { throw new Exception($errstr); });
-$conn = new PDO(sprintf("pgsql:host=%s;port=%d;user=%s;dbname=%s",
-	'localhost', 5432, 'maxer', 'postgres')
+$db = parse_url(getenv('DATABASE_URL'));
+$conn = new PDO(sprintf("pgsql:host=%s;port=%s;user=%s;password=%s;dbname=%s",
+	$db['host'], $db['port'], $db['user'], $db['pass'], ltrim($db['path'], '/'))
 );
 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 if (!isset($_GET['q'])) trigger_error('Invalid request', E_USER_ERROR);
