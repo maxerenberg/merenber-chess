@@ -6,9 +6,10 @@ $conn = new PDO(sprintf("pgsql:host=%s;port=%s;user=%s;password=%s;dbname=%s",
 );
 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $conn->exec("DELETE FROM CHESSPLAYERS");
+$conn->exec("DELETE FROM CHESSBOARD");
+// we can't delete the RECENTMOVE table because then the other player
+// won't know that checkmate occurred
 $conn = null;
 setcookie('playerID', '', time() - 3600);
-file_put_contents('chessboard.txt',  '');
-file_put_contents('recentMove.txt', '');
 echo "game successfully ended";
 ?>

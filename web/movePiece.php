@@ -16,7 +16,6 @@ foreach ($results as $row) {
 	}
 }
 if (!isset($playerNum)) die('Game has ended or you are not part of game');
-$conn = null;
 
 if (!isset($_POST['before']) and isset($_POST['after']) and isset($_POST['piece']))
 	die('Variables missing from request');
@@ -31,43 +30,52 @@ $oldy = intval($before[0]);
 $oldx = intval($before[2]);
 $newy = intval($after[0]);
 $newx = intval($after[2]);
-$board = file('chessboard.txt', FILE_IGNORE_NEW_LINES);
-$homecolor = $board[8] == 0 ? 'w' : 'b';
-$oppcolor = $board[8] == 0 ? 'b' : 'w';
+$board = $conn->query(
+	"SELECT COL0,COL1,COL2,COL3,COL4,COL5,COL6,COL7 FROM CHESSBOARD ORDER BY ROWNUM", PDO::FETCH_NUM
+)->fetchAll();
+if (count($board) != 8) trigger_error('CHESSBOARD table is malformed', E_USER_ERROR);
+$homecolor = $playerNum == 0 ? 'w' : 'b';
+$oppcolor = $playerNum == 0 ? 'b' : 'w';
+// check if it's their turn
+$result = $conn->query("SELECT PIECE FROM RECENTMOVE", PDO::FETCH_NUM)->fetch();
+if ($result === false) {
+	if ($playerNum != 0) die('Not your turn!');  // when the game begins, white player goes first
+} elseif ($results[0] == $homecolor) {
+	die('Not your turn!');  // if they moved the last piece, it can't be their turn
+}
 
-if ($playerNum != $board[8]) die('Not your turn!');
 if ($piece[0] != $homecolor) die("Must move your own piece");
 foreach (array($oldy, $oldx, $newy, $newx) as $x) {
 	if ($x < 0 or $x > 7) die('Invalid coordinates passed');
 }
 if ($oldx == $newx and $oldy == $newy) die('Must move piece to different position');
-for ($i = 0; $i < 8; $i++) $board[$i] = explode(' ', $board[$i]);
 if ($board[$oldy][$oldx] != $piece) die('Piece not in position specified');
 if (!validMove($piece, $oldy, $oldx, $newy, $newx, $playerNum)) die('Invalid move');
 $board[$oldy][$oldx] = '000';
 $board[$newy][$newx] = $piece;
 if (inCheck($homecolor, $oppcolor, $board)) die('King would be in check');
 
-$extraInfo = "";
+$ptq = null;  // pawn-to-queen
 // if the piece was a pawn and it reached the end of the board, turn it into a queen
 if ($piece[1] == 'p' and (($homecolor == 'w' and $newy == 0) or ($homecolor == 'b' and $newy == 7))) {
 	$newID = $homecolor . 'q' . nextQueen($homecolor);
 	$board[$newy][$newx] = $newID;
-	$extraInfo .= " " . $newID;
+	$ptq = $newID;
 }
-$checkFlag = inCheck($oppcolor, $homecolor, $board);
-if ($checkFlag) $extraInfo .= " check";
-if (isCheckmate($oppcolor, $homecolor)) {
-	$extraInfo .= $checkFlag ? "mate" : " checkmate";
-}
-$f = fopen("chessboard.txt", 'w');
+$checkFlag = inCheck($oppcolor, $homecolor, $board) ? '1' : '0';
+$checkmateFlag = isCheckmate($oppcolor, $homecolor) ? '1' : '0';
+
+$conn->exec("DELETE FROM CHESSBOARD");
+$stmt = $conn->prepare("INSERT INTO CHESSBOARD VALUES (?,?,?,?,?,?,?,?,?)");
 for ($i = 0; $i < 8; $i++) {
-	fwrite($f, implode(' ', $board[$i]) . "\n");
+	$row = array_merge(array($i), $board[$i]);
+	$stmt->execute($row);
 }
-fwrite($f, $board[8] == 0 ? '1' : '0');
-fclose($f);
-file_put_contents('recentMove.txt', $before . ' ' . $after . ' ' . $piece . $extraInfo);
+$conn->exec("DELETE FROM RECENTMOVE");
+$stmt = $conn->prepare("INSERT INTO RECENTMOVE VALUES (?,?,?,?,?,?)");
+$stmt->execute(array($before, $after, $piece, $checkFlag, $checkmateFlag, $ptq));
 setcookie('playerID', strval($playerID), strtotime('tomorrow'), '/');  // increase the expiration date
+$conn = null;
 echo 'success';
 
 function sign($x) {

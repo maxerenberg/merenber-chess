@@ -50,6 +50,8 @@ if (playerFlag === 0) {
 	document.body.appendChild(button);
 
 	initBoard();
+	updateBoard();
+	var mostRecentMove = 'false';
 	var sendMoveMsgUpdater = setTimeout(null, 0);
 	var boardUpdater = setInterval(updateBoard, 1000);
 }
@@ -58,9 +60,9 @@ function initBoard() {
 	var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-			var tableData = this.responseText.replace('/\r/', '').split("\n");
+			var tableData = JSON.parse(this.responseText);
+			if (tableData.length != 8) throw "Bad response";
 			for (var i = 0; i < 8; i++) {
-				tableData[i] = tableData[i].split(" ");
 				for (var j = 0; j < 8; j++) {
 					var id = tableData[i][j];
 					if (id == '000') continue;
@@ -76,10 +78,25 @@ function initBoard() {
 					document.getElementById(i + ':' + j).appendChild(img);
 				}
 			}
-			document.getElementById('playerTurn').innerHTML = tableData[8] == playerNum ? "your" : "your opponent's";
 		}
 	};
-	xhttp.open('GET', 'chessboard.txt');
+	xhttp.open('GET', 'update.php?q=initboard');
+	xhttp.send();
+	// now initialize whose turn it is
+	xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var data = JSON.parse(this.responseText);
+			var elem = document.getElementById('playerTurn');
+			if (data === false) {
+				elem.innerHTML = playerNum == 0 ? "your" : "your opponent's";
+				// if game just started, white player goes first
+			} else {
+				elem.innerHTML = homecolor == data['piece'].charAt(0) ? "your opponent's" : "your";
+			}
+		}
+	}
+	xhttp.open('GET', 'update.php?q=updateboard');
 	xhttp.send();
 }
 
@@ -123,12 +140,6 @@ function updateRecentMoveMsg(msg, imgId) {
 	} else if (msg == 'checkmate') {
 		msg = 'Checkmate! ' + (c == homecolor ? 'You win' :  'Game over');
 		endGame();
-	} else if (/^[wb]q[0-8]$/.test(msg)) {  // turn a pawn into a queen
-		var img = document.getElementById(imgId);
-		if (img === null) return;  // we've already turned it into a queen
-		img.setAttribute('id', msg);
-		img.setAttribute('src', c + 'q.png');
-		return;
 	}
 	document.getElementById('recentMoveMsg').innerHTML = msg;
 }
@@ -142,29 +153,40 @@ function updateBoard() {
 	var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-			if (mostRecentMove == this.responseText) return;  // for efficiency
-			var data = this.responseText.split(' ');
-			if (data.length < 3) return;  // in case we query the file while it's being written to
-			if (data[2].charAt(0) != homecolor) {  // if the most recent move was our own, there's nothing to move
-				var img = document.getElementById(data[2]);
+			if (mostRecentMove === this.responseText) return;  // for efficiency
+			var data = JSON.parse(this.responseText);
+			if (data === false) return;  // when the game first starts, the table will be empty
+			if (data['piece'].charAt(0) != homecolor) {  // if the most recent move was our own, there's nothing to move
+				var img = document.getElementById(data['piece']);
 				if (img !== null) {  
-				// if img is null, we previously transformed it into a queen; 
-				// the (mostRecentMove == this.responseText) should prevent this from happening though
-					var target = document.getElementById(data[1]);
+				// it's possible that img is null if a pawn turned into a queen and the page was refreshed 
+				// (since mostRecentMove is initialized to 'false')
+					var target = document.getElementById(data['new']);
 					if (target.hasChildNodes() && target.firstChild !== img) target.removeChild(target.firstChild);  
-					// it's possible that target.firstChild === img if, for whatever reason, 
-					// the (mostRecentMove == this.responseText) failed
+					// it's possible that target.firstChild === img if the page was refreshed
 					target.appendChild(img);
 				}
 				document.getElementById('playerTurn').innerHTML = 'your';
 			}
-			mostRecentMove = this.responseText;
+			mostRecentMove = data;
 			document.getElementById('recentMoveMsg').innerHTML = '';
 			// if there was any other info passed along, process it and act accordingly
-			for (var i = 3; i < data.length; i++) updateRecentMoveMsg(data[i], data[2]);
+			if (data['pawntoqueen'] !== null) {
+				var img = document.getElementById(data['piece']);
+				if (img !== null) {
+					// it's possible that img is null if the page was refreshed
+					img.setAttribute('id', data['pawntoqueen']);
+					img.setAttribute('src', data['piece'].charAt(0) + 'q.png');
+				}
+			}
+			if (data['checkmate']) {
+				updateRecentMoveMsg('checkmate', data['piece']);
+			} else {
+				if (data['incheck']) updateRecentMoveMsg('check', data['piece']);
+			}
 		}
 	};
-	xhttp.open('GET', 'recentMove.txt');
+	xhttp.open('GET', 'update.php?q=updateboard');
 	xhttp.send();
 }
 function endGame() {
@@ -180,7 +202,7 @@ function endGame() {
 	document.body.removeChild(document.getElementById('exitGame'));
 	document.getElementById('playerTurn').parentNode.innerHTML = 'Game has ended';
 	var a = document.createElement('a');
-	a.setAttribute('href', 'chess.php');
+	a.setAttribute('href', 'index.php');
 	a.innerHTML = 'Click here to play again';
 	document.body.appendChild(a);
 }

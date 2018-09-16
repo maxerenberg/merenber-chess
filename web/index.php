@@ -34,11 +34,20 @@ if ($playerFlag == 0) {
 			trigger_error('Invalid player name: ', E_USER_ERROR);  // TODO: change this to a more user-friendly error
 		}
 		if ($numPlayers == 0) {
-			$boardText = "br0 bn0 bb0 bk0 bq0 bb1 bn1 br1\nbp0 bp1 bp2 bp3 bp4 bp5 bp6 bp7\n"
-				. str_repeat(implode(' ', array_fill(0, 8, '000')) . "\n", 4)
-				. "wp0 wp1 wp2 wp3 wp4 wp5 wp6 wp7\nwr0 wn0 wb0 wk0 wq0 wb1 wn1 wr1\n0";
-			file_put_contents('chessboard.txt',  $boardText);
-			file_put_contents('recentMove.txt', '');
+			$conn->exec("DELETE FROM CHESSBOARD");
+			$board = array(
+				array(0,'br0','bn0','bb0','bk0','bq0','bb1','bn1','br1'),
+				array(1,'bp0','bp1','bp2','bp3','bp4','bp5','bp6','bp7'),
+				array(2,'000','000','000','000','000','000','000','000'),
+				array(3,'000','000','000','000','000','000','000','000'),
+				array(4,'000','000','000','000','000','000','000','000'),
+				array(5,'000','000','000','000','000','000','000','000'),
+				array(6,'wp0','wp1','wp2','wp3','wp4','wp5','wp6','wp7'),
+				array(7,'wr0','wn0','wb0','wk0','wq0','wb1','wn1','wr1')
+			);
+			$stmt = $conn->prepare("INSERT INTO CHESSBOARD VALUES (?,?,?,?,?,?,?,?,?)");
+			foreach ($board as $row) $stmt->execute($row);
+			$conn->exec("DELETE FROM RECENTMOVE");
 			$playerNum = 0;
 		} elseif ($numPlayers == 1) {
 			$playerNum = 1;
@@ -58,6 +67,8 @@ if ($playerFlag == 0) {
 	}
 }
 $conn = null;
+$mostRecentMove = array('old'=>null,'new'=>null,'piece'=>null,
+	'incheck'=>null,'checkmate'=>null,'pawntoqueen'=>null);
 ?>
 <!DOCTYPE html>
 <html>
@@ -68,10 +79,9 @@ $conn = null;
 </head>
 <body>
 <script>
-var playerFlag = <?php echo $playerFlag; ?>;
-var playerNum = <?php echo $playerNum; ?>;
-var playerName = "<?php echo $playerName; ?>";
-var mostRecentMove = "<?php echo file_get_contents('recentMove.txt'); ?>";
+	var playerFlag = <?php echo $playerFlag; ?>;
+	var playerNum = <?php echo $playerNum; ?>;
+	var playerName = "<?php echo $playerName; ?>";
 </script>
 <script src="chess.js"></script>
 </body>
