@@ -1,0 +1,8 @@
+table {border:1px solid; border-collapse:collapse;}
+td {border:1px solid; width:70px; height:70px;}
+tr:nth-child(odd) td:nth-child(odd) {background-color:peru;}
+tr:nth-child(even) td:nth-child(even) {background-color:peru;}
+td img {max-width:100%; max-height:100%; display:block; margin:auto;}
+#playerTurn {font-weight:bold;}
+#sendMoveMsg {color:red;}
+.unselectable {-webkit-user-drag:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;}
