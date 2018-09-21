@@ -7,8 +7,9 @@ $conn = new PDO(sprintf("pgsql:host=%s;port=%s;user=%s;password=%s;dbname=%s",
 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $conn->exec("DELETE FROM CHESSPLAYERS");
 $conn->exec("DELETE FROM CHESSBOARD");
-// we can't delete the RECENTMOVE table because then the other player
-// won't know that checkmate occurred
+// update the RECENTMOVE table so that the other player knows the game was
+//  forcefully ended (i.e. it wasn't a checkmate)
+$conn->exec("UPDATE RECENTMOVE SET ENDGAME = '1'");
 $conn = null;
 setcookie('playerID', '', time() - 3600);
 echo "game successfully ended";

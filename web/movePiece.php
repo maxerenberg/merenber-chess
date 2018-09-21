@@ -72,7 +72,7 @@ for ($i = 0; $i < 8; $i++) {
 	$stmt->execute($row);
 }
 $conn->exec("DELETE FROM RECENTMOVE");
-$stmt = $conn->prepare("INSERT INTO RECENTMOVE VALUES (?,?,?,?,?,?)");
+$stmt = $conn->prepare("INSERT INTO RECENTMOVE VALUES (?,?,?,?,?,?,'0')");
 $stmt->execute(array($before, $after, $piece, $checkFlag, $checkmateFlag, $ptq));
 setcookie('playerID', strval($playerID), strtotime('tomorrow'), '/');  // increase the expiration date
 $conn = null;

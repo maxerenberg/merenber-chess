@@ -181,6 +181,8 @@ function updateBoard() {
 			}
 			if (data['checkmate']) {
 				updateRecentMoveMsg('checkmate', data['piece']);
+			} else if (data['endgame']) {  // data['endgame'] means the game was ended forcefully
+				endGame();
 			} else {
 				if (data['incheck']) updateRecentMoveMsg('check', data['piece']);
 			}
@@ -194,15 +196,14 @@ function endGame() {
 	var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-			console.log(this.responseText);  // just for confirmation
+			document.body.removeChild(document.getElementById('exitGame'));
+			document.getElementById('playerTurn').parentNode.innerHTML = 'Game has ended';
+			var a = document.createElement('a');
+			a.setAttribute('href', location.href);
+			a.innerHTML = 'Click here to play again';
+			document.body.appendChild(a);
 		}
 	};
 	xhttp.open('GET', 'endGame.php');
 	xhttp.send();
-	document.body.removeChild(document.getElementById('exitGame'));
-	document.getElementById('playerTurn').parentNode.innerHTML = 'Game has ended';
-	var a = document.createElement('a');
-	a.setAttribute('href', 'index.php');
-	a.innerHTML = 'Click here to play again';
-	document.body.appendChild(a);
 }
