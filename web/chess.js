@@ -1,6 +1,6 @@
 if (playerFlag === 0) {
 	var form = document.createElement('form');
-	form.setAttribute('action', "index.php");
+	form.setAttribute('action', location.href);
 	form.setAttribute('method', 'POST');
 	form.appendChild(document.createTextNode('Enter your name (alphanumeric characters only): '));
 	var input = document.createElement('input');
@@ -179,7 +179,9 @@ function updateBoard() {
 					img.setAttribute('src', data['piece'].charAt(0) + 'q.png');
 				}
 			}
-			if (data['checkmate']) {
+			if (data['checkmate']) {  
+			   // see if checkmate occurred BEFORE looking at endgame (since the endGame() function will always 
+			   //  set that column to true)
 				updateRecentMoveMsg('checkmate', data['piece']);
 			} else if (data['endgame']) {  // data['endgame'] means the game was ended forcefully
 				endGame();
