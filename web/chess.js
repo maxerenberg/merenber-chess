@@ -88,7 +88,7 @@ function initBoard() {
 		if (this.readyState == 4 && this.status == 200) {
 			var data = JSON.parse(this.responseText);
 			var elem = document.getElementById('playerTurn');
-			if (data === false) {
+			if (data['old'] === null) {  // i.e. game has just started
 				elem.innerHTML = playerNum == 0 ? "your" : "your opponent's";
 				// if game just started, white player goes first
 			} else {
