@@ -38,8 +38,8 @@ $homecolor = $playerNum == 0 ? 'w' : 'b';
 $oppcolor = $playerNum == 0 ? 'b' : 'w';
 // check if it's their turn
 $result = $conn->query("SELECT PIECE FROM RECENTMOVE", PDO::FETCH_NUM)->fetch();
-if ($result === false) {
-	if ($playerNum != 0) die('Not your turn!');  // when the game begins, white player goes first
+if ($result[0] === null and $playerNum != 0) {
+	die('Not your turn!');  // when the game begins, white player goes first
 } elseif ($results[0] == $homecolor) {
 	die('Not your turn!');  // if they moved the last piece, it can't be their turn
 }
