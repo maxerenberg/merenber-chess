@@ -8,11 +8,15 @@ $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 if (!isset($_GET['q'])) trigger_error('Invalid request', E_USER_ERROR);
 if ($_GET['q'] == 'initboard') {
 	$results = $conn->query(
-		"SELECT COL0,COL1,COL2,COL3,COL4,COL5,COL6,COL7 FROM CHESSBOARD ORDER BY ROWNUM", PDO::FETCH_NUM
+		"SELECT COL0,COL1,COL2,COL3,COL4,COL5,COL6,COL7 FROM CHESSBOARD ORDER BY ROWNUM", 
+		PDO::FETCH_NUM
 	)->fetchAll();
 	if (count($results) != 8) trigger_error('CHESSBOARD table is malformed', E_USER_ERROR);
 } elseif ($_GET['q'] == 'updateboard') {
-	$results = $conn->query("SELECT * FROM RECENTMOVE", PDO::FETCH_ASSOC)->fetch();
+	$results = $conn->query(
+		"SELECT OLD,NEW,PIECE,INCHECK,CHECKMATE,PAWNTOQUEEN FROM RECENTMOVE", 
+		PDO::FETCH_ASSOC
+	)->fetch();
 } else {
 	trigger_error('Invalid request', E_USER_ERROR);
 }

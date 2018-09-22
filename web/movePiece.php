@@ -72,7 +72,9 @@ for ($i = 0; $i < 8; $i++) {
 	$stmt->execute($row);
 }
 $conn->exec("DELETE FROM RECENTMOVE");
-$stmt = $conn->prepare("INSERT INTO RECENTMOVE VALUES (?,?,?,?,?,?,'0')");
+$stmt = $conn->prepare("INSERT INTO RECENTMOVE VALUES (?,?,?,?,?,?,'0',now())");
+// those last two values are 'endgame' and 'stamp', which are used to tell if the game was forcefully ended,
+// and whether to delete the data to allow new players to join
 $stmt->execute(array($before, $after, $piece, $checkFlag, $checkmateFlag, $ptq));
 setcookie('playerID', strval($playerID), strtotime('tomorrow'), '/');  // increase the expiration date
 $conn = null;
