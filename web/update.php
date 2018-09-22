@@ -14,7 +14,7 @@ if ($_GET['q'] == 'initboard') {
 	if (count($results) != 8) trigger_error('CHESSBOARD table is malformed', E_USER_ERROR);
 } elseif ($_GET['q'] == 'updateboard') {
 	$results = $conn->query(
-		"SELECT OLD,NEW,PIECE,INCHECK,CHECKMATE,PAWNTOQUEEN FROM RECENTMOVE", 
+		"SELECT OLD,NEW,PIECE,INCHECK,CHECKMATE,PAWNTOQUEEN,ENDGAME FROM RECENTMOVE", 
 		PDO::FETCH_ASSOC
 	)->fetch();
 } else {
