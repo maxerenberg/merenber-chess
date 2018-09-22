@@ -48,6 +48,7 @@ if ($playerFlag == 0) {
 			$stmt = $conn->prepare("INSERT INTO CHESSBOARD VALUES (?,?,?,?,?,?,?,?,?)");
 			foreach ($board as $row) $stmt->execute($row);
 			$conn->exec("DELETE FROM RECENTMOVE");
+			$conn->exec("INSERT INTO RECENTMOVE (STAMP) VALUES (NOW())");
 			$playerNum = 0;
 		} elseif ($numPlayers == 1) {
 			$playerNum = 1;

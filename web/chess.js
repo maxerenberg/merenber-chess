@@ -155,7 +155,7 @@ function updateBoard() {
 		if (this.readyState == 4 && this.status == 200) {
 			if (mostRecentMove === this.responseText) return;  // for efficiency
 			var data = JSON.parse(this.responseText);
-			if (data === false) return;  // when the game first starts, the table will be empty
+			if (data['old'] === null) return;  // when the game first starts, the values in the table (except for STAMP) will be null
 			if (data['piece'].charAt(0) != homecolor) {  // if the most recent move was our own, there's nothing to move
 				var img = document.getElementById(data['piece']);
 				if (img !== null) {  
