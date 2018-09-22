@@ -1,11 +1,5 @@
 <?php
-set_error_handler(function($errno, $errstr) {
-	if ($errno == E_USER_ERROR) {
-		session_unset();
-		session_destroy();
-	}
-	throw new Exception($errstr); 
-});
+set_error_handler(function($errno, $errstr) { throw new Exception($errstr); });
 $playerID = isset($_COOKIE['playerID']) ? intval($_COOKIE['playerID']) : null;
 // connect to database
 $db = parse_url(getenv('DATABASE_URL'));

@@ -1,4 +1,5 @@
 <?php
+set_error_handler(function($errno, $errstr) { throw new Exception($errstr); });
 $db = parse_url(getenv('DATABASE_URL'));
 $conn = new PDO(sprintf("pgsql:host=%s;port=%s;user=%s;password=%s;dbname=%s",
 	$db['host'], $db['port'], $db['user'], $db['pass'], ltrim($db['path'], '/'))
