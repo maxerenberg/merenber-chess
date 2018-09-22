@@ -37,8 +37,8 @@ if (count($board) != 8) trigger_error('CHESSBOARD table is malformed', E_USER_ER
 $homecolor = $playerNum == 0 ? 'w' : 'b';
 $oppcolor = $playerNum == 0 ? 'b' : 'w';
 // check if it's their turn
-$result = $conn->query("SELECT PIECE FROM RECENTMOVE", PDO::FETCH_NUM)->fetch();
-if ($result[0] === null and $playerNum != 0) {
+$result = $conn->query("SELECT PIECE FROM RECENTMOVE", PDO::FETCH_NUM)->fetch()[0];
+if ($result === null and $playerNum != 0) {
 	die('Not your turn!');  // when the game begins, white player goes first
 } elseif ($result[0] == $homecolor) {
 	die('Not your turn!');  // if they moved the last piece, it can't be their turn
