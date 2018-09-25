@@ -30,14 +30,14 @@ if ($playerFlag == 0) {
 		if ($numPlayers == 0) {
 			$conn->exec("DELETE FROM CHESSBOARD");
 			$board = array(
-				array(0,'br0','bn0','bb0','bk0','bq0','bb1','bn1','br1'),
+				array(0,'br0','bn0','bb0','bq0','bk0','bb1','bn1','br1'),
 				array(1,'bp0','bp1','bp2','bp3','bp4','bp5','bp6','bp7'),
 				array(2,'000','000','000','000','000','000','000','000'),
 				array(3,'000','000','000','000','000','000','000','000'),
 				array(4,'000','000','000','000','000','000','000','000'),
 				array(5,'000','000','000','000','000','000','000','000'),
 				array(6,'wp0','wp1','wp2','wp3','wp4','wp5','wp6','wp7'),
-				array(7,'wr0','wn0','wb0','wk0','wq0','wb1','wn1','wr1')
+				array(7,'wr0','wn0','wb0','wq0','wk0','wb1','wn1','wr1')
 			);
 			$stmt = $conn->prepare("INSERT INTO CHESSBOARD VALUES (?,?,?,?,?,?,?,?,?)");
 			foreach ($board as $row) $stmt->execute($row);

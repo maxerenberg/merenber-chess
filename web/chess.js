@@ -140,6 +140,9 @@ function updateRecentMoveMsg(msg, imgId) {
 	} else if (msg == 'checkmate') {
 		msg = 'Checkmate! ' + (c == homecolor ? 'You win' :  'Game over');
 		endGame();
+	} else if (msg == 'stalemate') {
+		msg = 'Stalemate! Tie';
+		endGame();
 	}
 	document.getElementById('recentMoveMsg').innerHTML = msg;
 }
@@ -180,13 +183,15 @@ function updateBoard() {
 				}
 			}
 			if (data['checkmate']) {  
-			   // see if checkmate occurred BEFORE looking at endgame (since the endGame() function will always 
-			   //  set that column to true)
-				updateRecentMoveMsg('checkmate', data['piece']);
+				if (data['incheck']) {
+					updateRecentMoveMsg('checkmate', data['piece'])
+				} else {
+					updateRecentMoveMsg('stalemate', data['piece']);
+				}
 			} else if (data['endgame']) {  // data['endgame'] means the game was ended forcefully
 				endGame();
-			} else {
-				if (data['incheck']) updateRecentMoveMsg('check', data['piece']);
+			} else if (data['incheck']) {
+				updateRecentMoveMsg('check', data['piece']);
 			}
 		}
 	};
