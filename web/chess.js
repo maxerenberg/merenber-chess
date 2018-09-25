@@ -158,6 +158,10 @@ function updateBoard() {
 		if (this.readyState == 4 && this.status == 200) {
 			if (mostRecentMove === this.responseText) return;  // for efficiency
 			var data = JSON.parse(this.responseText);
+			if (data['endgame']) {
+				endGame();  // data['endgame'] means the game was ended forcefully
+				return;
+			}
 			if (data['old'] === null) return;  // when the game first starts, the values in the table (except for STAMP) will be null
 			if (data['piece'].charAt(0) != homecolor) {  // if the most recent move was our own, there's nothing to move
 				var img = document.getElementById(data['piece']);
@@ -188,8 +192,6 @@ function updateBoard() {
 				} else {
 					updateRecentMoveMsg('stalemate', data['piece']);
 				}
-			} else if (data['endgame']) {  // data['endgame'] means the game was ended forcefully
-				endGame();
 			} else if (data['incheck']) {
 				updateRecentMoveMsg('check', data['piece']);
 			}
